@@ -1,5 +1,5 @@
-// Groq AI Helper — Free, fast, works globally
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 export async function generateAIResponse(systemPrompt: string, userMessage: string): Promise<string> {
