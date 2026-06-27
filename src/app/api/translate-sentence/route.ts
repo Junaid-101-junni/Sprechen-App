@@ -1,6 +1,6 @@
 // English → German translation with word-by-word breakdown
 import { NextRequest, NextResponse } from "next/server";
-import ZAI from "z-ai-web-dev-sdk";
+import { getZAI } from "@/lib/zai-helper";
 
 interface TranslateRequest {
   text: string;
@@ -41,7 +41,7 @@ Rules:
 - Keep example sentences short (5-8 words)
 - Make word meanings context-specific`;
 
-    const zai = await ZAI.create();
+    const zai = getZAI();
     const completion = await zai.chat.completions.create({
       messages: [{ role: "system", content: systemPrompt }, { role: "user", content: `Translate and break down: "${text}"` }],
       temperature: 0.4,
