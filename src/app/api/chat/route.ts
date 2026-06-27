@@ -1,4 +1,5 @@
 // AI German voice conversation endpoint
+import { corsResponse, handleOptions } from "@/lib/cors";
 // Returns structured JSON: German reply, English translation, corrections, new vocab, encouragement
 import { NextRequest, NextResponse } from "next/server";
 import { getZAI } from "@/lib/zai-helper";
@@ -31,11 +32,15 @@ const PERSONA_ADDITIONS: Record<string, string> = {
   clara: "You are Clara, a fun and casual German friend. You make learning feel like hanging out with a buddy. You use natural, conversational German and occasional slang at higher levels. You're playful and relaxed.",
 };
 
+export async function OPTIONS() {
+  return handleOptions();
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
     const { messages, level, topic, mode, scenario, persona, tutorPersonaId } = body;
-    if (!messages?.length) return NextResponse.json({ error: "messages array is required" }, { status: 400 });
+    if (!messages?.length) return corsResponse({ error: "messages array is required" }, { status: 400 });
 
     const levelInstruction = LEVEL_INSTRUCTIONS[level] || LEVEL_INSTRUCTIONS.A1;
     const personaAdd = PERSONA_ADDITIONS[tutorPersonaId || "anna"] || PERSONA_ADDITIONS.anna;
@@ -77,9 +82,7 @@ You MUST respond in this exact JSON format (no other text):
 
 Only include corrections if the user actually made mistakes. Only include 1-3 new vocabulary words. Keep all fields concise.`;
 
-    const zai = getZAI();
-
-
+    const zai = await getZAI();
     const completion = await zai.chat.completions.create({
       messages: [{ role: "system", content: systemPrompt }, ...messages],
       temperature: 0.7,
@@ -94,10 +97,10 @@ Only include corrections if the user actually made mistakes. Only include 1-3 ne
     } catch {
       parsed = { germanReply: content, englishTranslation: "", corrections: [], newVocabulary: [], encouragement: "" };
     }
-    return NextResponse.json({ ...parsed, level, timestamp: Date.now() });
+    return corsResponse({ ...parsed, level, timestamp: Date.now() });
   } catch (error) {
     console.error("Chat API error:", error);
     const msg = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: `Chat failed: ${msg}` }, { status: 500 });
+    return corsResponse({ error: `Chat failed: ${msg}` }, { status: 500 });
   }
 }

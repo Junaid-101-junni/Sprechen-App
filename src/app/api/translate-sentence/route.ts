@@ -1,4 +1,5 @@
 // English → German translation with word-by-word breakdown
+import { corsResponse, handleOptions } from "@/lib/cors";
 import { NextRequest, NextResponse } from "next/server";
 import { getZAI } from "@/lib/zai-helper";
 
@@ -7,11 +8,15 @@ interface TranslateRequest {
   level: "A1" | "A2" | "B1" | "B2";
 }
 
+export async function OPTIONS() {
+  return handleOptions();
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { text, level } = await req.json() as TranslateRequest;
-    if (!text?.trim()) return NextResponse.json({ error: "text is required" }, { status: 400 });
-    if (text.length > 500) return NextResponse.json({ error: "Text too long (max 500 chars)" }, { status: 400 });
+    if (!text?.trim()) return corsResponse({ error: "text is required" }, { status: 400 });
+    if (text.length > 500) return corsResponse({ error: "Text too long (max 500 chars)" }, { status: 400 });
 
     const systemPrompt = `You are a German translation tutor for an English speaker at CEFR level ${level}. The user said: "${text}"
 
@@ -41,7 +46,7 @@ Rules:
 - Keep example sentences short (5-8 words)
 - Make word meanings context-specific`;
 
-    const zai = getZAI();
+    const zai = await getZAI();
     const completion = await zai.chat.completions.create({
       messages: [{ role: "system", content: systemPrompt }, { role: "user", content: `Translate and break down: "${text}"` }],
       temperature: 0.4,
@@ -54,10 +59,10 @@ Rules:
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
     } catch { parsed = { raw: content }; }
-    return NextResponse.json({ ...parsed, originalText: text, level });
+    return corsResponse({ ...parsed, originalText: text, level });
   } catch (error) {
     console.error("Translate API error:", error);
     const msg = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: `Translation failed: ${msg}` }, { status: 500 });
+    return corsResponse({ error: `Translation failed: ${msg}` }, { status: 500 });
   }
 }

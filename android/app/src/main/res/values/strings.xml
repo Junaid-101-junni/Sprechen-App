@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Juni Boli Talk</string>
-    <string name="title_activity_main">Juni Boli Talk</string>
-    <string name="package_name">com.junibolitalk.app</string>
-    <string name="custom_url_scheme">com.junibolitalk.app</string>
-</resources>

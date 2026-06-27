@@ -1,4 +1,5 @@
 // AI word explanation endpoint
+import { corsResponse, handleOptions } from "@/lib/cors";
 // Generates rich context for any word in the vocabulary bank
 
 import { NextRequest, NextResponse } from "next/server";
@@ -11,16 +12,20 @@ interface ExplainRequest {
   context?: string;
 }
 
+export async function OPTIONS() {
+  return handleOptions();
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: ExplainRequest = await req.json();
     const { word, level, english, context } = body;
 
     if (!word) {
-      return NextResponse.json({ error: "word is required" }, { status: 400 });
+      return corsResponse({ error: "word is required" }, { status: 400 });
     }
 
-    const zai = getZAI();
+    const zai = await getZAI();
     const completion = await zai.chat.completions.create({
       messages: [
         {
@@ -56,11 +61,11 @@ Respond in JSON format:
       parsed = { raw: content };
     }
 
-    return NextResponse.json({ ...parsed, word, level });
+    return corsResponse({ ...parsed, word, level });
   } catch (error) {
     console.error("Explain API error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
+    return corsResponse(
       { error: `Failed: ${message}` },
       { status: 500 }
     );

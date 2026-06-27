@@ -1,21 +1,23 @@
 // API configuration for Juni Boli Talk
-// When running as web app (dev/Vercel): uses relative paths ("/api/chat")
-// When running as APK (Capacitor): needs full URL to deployed server
+// Uses Vercel deployment for AI features
 
-// Change this to your deployed Vercel URL after deploying
-// Example: "https://juni-boli-talk.vercel.app"
-const API_BASE_URL = "";
+const API_BASE_URL = "https://sprechen-app.vercel.app";
 
 export function getApiUrl(endpoint: string): string {
-  // If running in Capacitor (APK), use full URL
   if (typeof window !== "undefined") {
-    // Check if running as Capacitor app (file:// protocol)
-    if (window.location.protocol === "file:" || window.location.protocol === "https:") {
-      if (API_BASE_URL) {
-        return `${API_BASE_URL}${endpoint}`;
-      }
+    // Dev server: localhost:3000
+    if (window.location.hostname === "localhost" && window.location.port === "3000") {
+      return endpoint;
+    }
+    // Vercel deployment
+    if (window.location.hostname.includes("vercel.app")) {
+      return endpoint;
+    }
+    // Sandbox preview URL
+    if (window.location.hostname.includes("space-z.ai")) {
+      return endpoint;
     }
   }
-  // Default: relative path (works for dev and Vercel)
-  return endpoint;
+  // Everything else (APK/Capacitor) → use Vercel URL
+  return `${API_BASE_URL}${endpoint}`;
 }

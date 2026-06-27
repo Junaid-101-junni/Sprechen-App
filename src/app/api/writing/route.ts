@@ -1,4 +1,5 @@
 // AI writing feedback endpoint
+import { corsResponse, handleOptions } from "@/lib/cors";
 // Analyzes user's German writing and provides feedback
 
 import { NextRequest, NextResponse } from "next/server";
@@ -11,20 +12,24 @@ interface WritingRequest {
   nativeLanguage?: string;
 }
 
+export async function OPTIONS() {
+  return handleOptions();
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: WritingRequest = await req.json();
     const { text, level, prompt, nativeLanguage = "English" } = body;
 
     if (!text || !text.trim()) {
-      return NextResponse.json(
+      return corsResponse(
         { error: "text is required" },
         { status: 400 }
       );
     }
 
     if (text.length > 2000) {
-      return NextResponse.json(
+      return corsResponse(
         { error: "Text too long (max 2000 characters)" },
         { status: 400 }
       );
@@ -55,7 +60,7 @@ Provide feedback in this exact JSON structure:
 
 Be specific and constructive. Focus on patterns the user can learn from. Keep explanations concise. If the text is very good, say so and suggest only minor improvements.`;
 
-    const zai = getZAI();
+    const zai = await getZAI();
     const completion = await zai.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
@@ -74,11 +79,11 @@ Be specific and constructive. Focus on patterns the user can learn from. Keep ex
       parsed = { raw: content };
     }
 
-    return NextResponse.json({ ...parsed, originalText: text, level });
+    return corsResponse({ ...parsed, originalText: text, level });
   } catch (error) {
     console.error("Writing API error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
+    return corsResponse(
       { error: `Writing analysis failed: ${message}` },
       { status: 500 }
     );
@@ -86,7 +91,7 @@ Be specific and constructive. Focus on patterns the user can learn from. Keep ex
 }
 
 export async function GET() {
-  return NextResponse.json({
+  return corsResponse({
     status: "ok",
     endpoint: "/api/writing",
     description: "AI German writing analysis and feedback",
