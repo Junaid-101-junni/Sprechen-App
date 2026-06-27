@@ -1,7 +1,7 @@
 // AI German voice conversation endpoint
 // Returns structured JSON: German reply, English translation, corrections, new vocab, encouragement
 import { NextRequest, NextResponse } from "next/server";
-import ZAI from "z-ai-web-dev-sdk";
+import { getZAI } from "@/lib/zai-helper";
 
 interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -77,7 +77,9 @@ You MUST respond in this exact JSON format (no other text):
 
 Only include corrections if the user actually made mistakes. Only include 1-3 new vocabulary words. Keep all fields concise.`;
 
-    const zai = await ZAI.create();
+    const zai = getZAI();
+
+
     const completion = await zai.chat.completions.create({
       messages: [{ role: "system", content: systemPrompt }, ...messages],
       temperature: 0.7,
