@@ -1,6 +1,4 @@
 import ZAI from "z-ai-web-dev-sdk";
-import fs from "fs/promises";
-import path from "path";
 
 const ZAI_CONFIG = {
   baseUrl: "https://internal-api.z.ai/v1",
@@ -10,12 +8,6 @@ const ZAI_CONFIG = {
   userId: "54c2d1e5-099c-46f7-870b-7aa45fc13a15",
 };
 
-export async function getZAI() {
-  try {
-    await fs.writeFile(path.join(process.cwd(), ".z-ai-config"), JSON.stringify(ZAI_CONFIG));
-  } catch {}
-  try {
-    await fs.writeFile("/tmp/.z-ai-config", JSON.stringify(ZAI_CONFIG));
-  } catch {}
-  return await ZAI.create();
+export function getZAI() {
+  return new ZAI(ZAI_CONFIG);
 }
