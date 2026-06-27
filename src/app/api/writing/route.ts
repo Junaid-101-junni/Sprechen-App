@@ -2,7 +2,7 @@
 // Analyzes user's German writing and provides feedback
 
 import { NextRequest, NextResponse } from "next/server";
-import ZAI from "z-ai-web-dev-sdk";
+import { getZAI } from "@/lib/zai-helper";
 
 interface WritingRequest {
   text: string;
@@ -55,7 +55,7 @@ Provide feedback in this exact JSON structure:
 
 Be specific and constructive. Focus on patterns the user can learn from. Keep explanations concise. If the text is very good, say so and suggest only minor improvements.`;
 
-    const zai = await ZAI.create();
+    const zai = getZAI();
     const completion = await zai.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
