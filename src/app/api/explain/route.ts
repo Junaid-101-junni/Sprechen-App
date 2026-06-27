@@ -2,7 +2,7 @@
 // Generates rich context for any word in the vocabulary bank
 
 import { NextRequest, NextResponse } from "next/server";
-import ZAI from "z-ai-web-dev-sdk";
+import { getZAI } from "@/lib/zai-helper";
 
 interface ExplainRequest {
   word: string;
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "word is required" }, { status: 400 });
     }
 
-    const zai = await ZAI.create();
+    const zai = getZAI();
     const completion = await zai.chat.completions.create({
       messages: [
         {
