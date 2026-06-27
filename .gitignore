@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+android/build/
+android/.gradle/
+
+# Environment
+.env
+*.log
+dev.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Capacitor
+android/app/build/
+android/captures/
+android/local.properties
